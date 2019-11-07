@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.orient.firecontrol_server_demo.dao.ConnectDetailDao">
+    <insert id="insert" parameterType="com.orient.firecontrol_server_demo.model.ConnectDetail">
+        INSERT INTO tb_connect_detail(ipaddr,port,boxcode) VALUES (#{ipaddr},#{port},#{boxcode})
+    </insert>
+
+
+    <select id="queryByBoxCode" resultType="com.orient.firecontrol_server_demo.model.ConnectDetail" parameterType="string">
+        SELECT ipaddr,port,boxcode FROM tb_connect_detail where boxcode = #{boxcode}
+    </select>
+    <select id="listAll" resultType="com.orient.firecontrol_server_demo.model.ConnectDetail">
+        SELECT ipaddr,port,boxcode FROM tb_connect_detail
+    </select>
+</mapper>
