@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLOutput;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -204,8 +206,17 @@ public class ThreadServer implements Runnable {
                                 log.info("这是测量值循环定时上送数据");
                                 log.info("建筑物id==="+trueData.substring(10, 20));
                                 log.info("一共发送了"+trueData.substring(27, 28)+"个数据包过来");
-
-                                socketManager.send41(trueData);
+                                //记录测量时间 把当前收到的信息 当成测量时间
+                                Date date = new Date();
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                String format = simpleDateFormat.format(date);
+                                String lengthData = trueData.substring(22, 24)+trueData.substring(20, 22);
+                                //将16进制数据 转成int数据 注意这里要乘以2 因为1=2个字符
+                                Integer len = Integer.parseInt(lengthData, 16)*2;
+                                //将当前时间戳拼接进去
+                                String needData = trueData.substring(0,20+len)+format+"03";
+                                //将需要的数据存入队列
+                                socketManager.send41(needData);
                                 log.info("已存入队列");
                                 String data = trueData.substring(28, trueData.length() - 2);
                                 for (int i = 0; i <data.length();) {
