@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.List;
 
 /**
@@ -52,10 +54,14 @@ public class TopicAckReceiver implements ChannelAwareMessageListener {
                     int port = connectDetail.getPort();
                     try {
                         client = new Socket(ipaddr, port);
+                        System.out.println("连接硬件设备成功");
+                        //将监控箱编号高低位互换
+//                        String box = msg.substring(30, 32)+msg.substring(28,30);
+//                        String change = msg.substring(0, 28)+box+msg.substring(32, 38);
+//                        System.out.println("互换监控箱高低位的50指令===="+change);
                         byte[] bytes = HexUtil.hexStringToByteArray(msg);
                         sendMessage(bytes);
-                        //发完关闭连接
-                        client.close();
+                        System.out.println("发送50指令成功");
                     } catch (IOException e) {
                         System.out.println("连接硬件设备失败,请检查"+connectDetail.getBoxcode()+"硬件设备是否在线");
                     }
