@@ -3,7 +3,6 @@ package com.orient.firecontrol_server_demo.socket;
 
 import com.orient.firecontrol_server_demo.model.AlarmEnum;
 import com.orient.firecontrol_server_demo.model.ConnectDetail;
-import com.orient.firecontrol_server_demo.redis.JedisUtil;
 import com.orient.firecontrol_server_demo.utils.HexUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -14,10 +13,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.sql.SQLOutput;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @Author: zhoudun
@@ -35,6 +31,7 @@ public class ThreadServer implements Runnable {
     private String mStrMSG;                        //来自server的消息
     private BufferedInputStream in;
     private SocketManager socketManager;
+    public static Map<String,Object> map = new HashMap<>();
 
 
 
@@ -138,24 +135,14 @@ public class ThreadServer implements Runnable {
                                     System.out.println("当前设备状态==="+((datai.substring(6).equals("01"))?"正常":"中断"));
                                     i=i+8;
                                 }
-                                log.info("#####ff接收结束#####");
                                 System.out.println(client);
-
-
                                 SocketAddress remoteSocketAddress = client.getRemoteSocketAddress();
-                                System.out.println("地址==="+remoteSocketAddress);
-                                int port = client.getPort();
-                                String ipAddr = client.getInetAddress().toString().substring(1);
+                                System.out.println("记录监控箱socket地址==="+remoteSocketAddress);
+                                //监控箱编号
                                 String boxCode = trueData.substring(10, 20)+data.substring(0, 4);
-                                // 清除可能存在的box socket
-                                if (JedisUtil.exists(boxCode)) {
-                                    JedisUtil.delKey(boxCode);
-                                }
-                                //将改socket保存起来
-                                JedisUtil.setObject("socket", client.toString());
-//                                ConnectDetail connectDetail = new ConnectDetail();
-//                                connectDetail.setIpaddr(ipAddr).setPort(port).setBoxcode(boxCode);
-//                                socketManager.insert(connectDetail);
+                                System.out.println("监控箱编号==="+boxCode);
+                                map.put(boxCode, client);
+                                log.info("#####ff接收结束#####");
                                 System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                             }
                             //40指令 事件值上送 eb90eb9002 3201110100 1000 40 01 0100 0201 0001 180824183618 03
