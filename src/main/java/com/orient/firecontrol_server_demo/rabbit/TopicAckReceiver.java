@@ -52,15 +52,14 @@ public class TopicAckReceiver implements ChannelAwareMessageListener {
                     int port = connectDetail.getPort();
                     try {
                         client = new Socket(ipaddr, port);
-                        byte[] bytes = HexUtil.hexStringToByteArray(msg);
-                        sendMessage(bytes);
-                        //发完关闭连接
-                        client.close();
                     } catch (IOException e) {
                         System.out.println("连接硬件设备失败,请检查"+connectDetail.getBoxcode()+"硬件设备是否在线");
                     }
+                    byte[] bytes = HexUtil.hexStringToByteArray(msg);
+                    sendMessage(bytes);
+                    //发完关闭连接
+                    client.close();
                 }
-
             }
             if (msg.substring(24, 26).equals("60")){//下发60对时指令
                 //60指令是发送给所有正在连接的硬件设备

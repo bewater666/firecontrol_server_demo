@@ -3,6 +3,7 @@ package com.orient.firecontrol_server_demo.socket;
 
 import com.orient.firecontrol_server_demo.model.AlarmEnum;
 import com.orient.firecontrol_server_demo.model.ConnectDetail;
+import com.orient.firecontrol_server_demo.redis.JedisUtil;
 import com.orient.firecontrol_server_demo.utils.HexUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.sql.SQLOutput;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -137,12 +139,23 @@ public class ThreadServer implements Runnable {
                                     i=i+8;
                                 }
                                 log.info("#####ff接收结束#####");
+                                System.out.println(client);
+
+
+                                SocketAddress remoteSocketAddress = client.getRemoteSocketAddress();
+                                System.out.println("地址==="+remoteSocketAddress);
                                 int port = client.getPort();
                                 String ipAddr = client.getInetAddress().toString().substring(1);
                                 String boxCode = trueData.substring(10, 20)+data.substring(0, 4);
-                                ConnectDetail connectDetail = new ConnectDetail();
-                                connectDetail.setIpaddr(ipAddr).setPort(port).setBoxcode(boxCode);
-                                socketManager.insert(connectDetail);
+                                // 清除可能存在的box socket
+                                if (JedisUtil.exists(boxCode)) {
+                                    JedisUtil.delKey(boxCode);
+                                }
+                                //将改socket保存起来
+                                JedisUtil.setObject("socket", client.toString());
+//                                ConnectDetail connectDetail = new ConnectDetail();
+//                                connectDetail.setIpaddr(ipAddr).setPort(port).setBoxcode(boxCode);
+//                                socketManager.insert(connectDetail);
                                 System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                             }
                             //40指令 事件值上送 eb90eb9002 3201110100 1000 40 01 0100 0201 0001 180824183618 03
@@ -201,6 +214,7 @@ public class ThreadServer implements Runnable {
                             // 0200 0602 d402 5701
                             // 0200 0702 0000 5001 03
                             // TODO: 2019/11/7 这里做了修改 修改指令 在末尾加入当前时间戳 记录测量时间 为了画折线图看数据随时间变化
+                            //理论上拼接了时间 报文长度也要做修改  但是后续开发不影响 所以这里不要改了
                             if (trueData.substring(24, 26).equals("41")||trueData.substring(24, 26).equals("42")){
                                 log.info("######41接收开始#####");
                                 log.info("这是测量值循环定时上送数据");
